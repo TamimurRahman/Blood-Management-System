@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Blood Banks - Blood Management System{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2><i class="bi bi-building"></i> Manage Blood Banks</h2>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5>Search & Filter Blood Banks</h5>
+    </div>
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <input type="text" class="form-control" name="search" placeholder="Search by name, city, or state..." 
+                       value="{{ search }}">
+            </div>
+            <div class="col-md-3">
+                <input type="text" class="form-control" name="city" placeholder="City" value="{{ city }}">
+            </div>
+            <div class="col-md-3">
+                <input type="text" class="form-control" name="state" placeholder="State" value="{{ state }}">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search"></i> Search
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5>Blood Banks List ({{ blood_banks.count }})</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Address</th>
+                        <th>City</th>
+                        <th>State</th>
+                        <th>Zip Code</th>
+                        <th>Phone</th>
+                        <th>Email</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for bank in blood_banks %}
+                    <tr>
+                        <td><strong>{{ bank.name }}</strong></td>
+                        <td>{{ bank.address }}</td>
+                        <td>{{ bank.city }}</td>
+                        <td>{{ bank.state }}</td>
+                        <td>{{ bank.zip_code }}</td>
+                        <td>{{ bank.phone_number }}</td>
+                        <td>{{ bank.email|default:"-" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted">No blood banks found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

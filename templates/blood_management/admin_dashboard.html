@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard - Blood Management System{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2><i class="bi bi-speedometer2"></i> Admin Dashboard</h2>
+        <p class="text-muted">System Overview</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <h3>{{ total_donors }}</h3>
+            <p><i class="bi bi-people"></i> Total Donors</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+            <h3>{{ total_blood_banks }}</h3>
+            <p><i class="bi bi-building"></i> Blood Banks</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+            <h3>{{ total_pending_requests }}</h3>
+            <p><i class="bi bi-hourglass-split"></i> Pending Requests</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+            <h3>{{ total_approved_requests }}</h3>
+            <p><i class="bi bi-check-circle"></i> Approved</p>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-clock-history"></i> Recent Donation Requests</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Donor</th>
+                                <th>Blood Group</th>
+                                <th>Blood Bank</th>
+                                <th>Units</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for request in recent_requests %}
+                            <tr>
+                                <td>{{ request.donor.user.get_full_name|default:request.donor.user.username }}</td>
+                                <td><span class="badge bg-danger">{{ request.blood_group }}</span></td>
+                                <td>{{ request.blood_bank.name }}</td>
+                                <td>{{ request.units_requested }}</td>
+                                <td>{{ request.request_date }}</td>
+                                <td>
+                                    {% if request.status == 'pending' %}
+                                        <span class="badge bg-warning">Pending</span>
+                                    {% elif request.status == 'approved' %}
+                                        <span class="badge bg-success">Approved</span>
+                                    {% elif request.status == 'rejected' %}
+                                        <span class="badge bg-danger">Rejected</span>
+                                    {% else %}
+                                        <span class="badge bg-info">Completed</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if request.status == 'pending' %}
+                                    <div class="btn-group btn-group-sm">
+                                        <form method="post" action="{% url 'approve_request' request.id %}" style="display: inline;">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-success btn-sm">
+                                                <i class="bi bi-check"></i> Approve
+                                            </button>
+                                        </form>
+                                        <form method="post" action="{% url 'reject_request' request.id %}" style="display: inline;">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                <i class="bi bi-x"></i> Reject
+                                            </button>
+                                        </form>
+                                    </div>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center text-muted">No requests yet.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <a href="{% url 'manage_requests' %}" class="btn btn-outline-primary">View All Requests</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-bar-chart"></i> Blood Group Statistics</h5>
+            </div>
+            <div class="card-body">
+                {% for bg, stats in blood_group_stats.items %}
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="blood-group-badge badge bg-danger">{{ bg }}</span>
+                        <span class="fw-bold">{{ stats.available_units }} units</span>
+                    </div>
+                    <small class="text-muted">{{ stats.donors }} donors</small>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

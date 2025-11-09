@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}Donation History - Blood Management System{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2><i class="bi bi-clock-history"></i> Donation History</h2>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5>All Donation Requests</h5>
+    </div>
+    <div class="card-body">
+        {% if donation_requests %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Request ID</th>
+                        <th>Blood Group</th>
+                        <th>Blood Bank</th>
+                        <th>Units Requested</th>
+                        <th>Request Date</th>
+                        <th>Status</th>
+                        <th>Admin Notes</th>
+                        <th>Created At</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for request in donation_requests %}
+                    <tr>
+                        <td>#{{ request.id }}</td>
+                        <td><span class="badge bg-danger">{{ request.blood_group }}</span></td>
+                        <td>{{ request.blood_bank.name }}</td>
+                        <td>{{ request.units_requested }}</td>
+                        <td>{{ request.request_date }}</td>
+                        <td>
+                            {% if request.status == 'pending' %}
+                                <span class="badge bg-warning">Pending</span>
+                            {% elif request.status == 'approved' %}
+                                <span class="badge bg-success">Approved</span>
+                            {% elif request.status == 'rejected' %}
+                                <span class="badge bg-danger">Rejected</span>
+                            {% else %}
+                                <span class="badge bg-info">Completed</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ request.admin_notes|default:"-" }}</td>
+                        <td>{{ request.created_at|date:"M d, Y" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted">No donation requests found.</p>
+        <a href="{% url 'create_donation_request' %}" class="btn btn-primary">Create First Request</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

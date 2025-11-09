@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Requests - Blood Management System{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2><i class="bi bi-clipboard-check"></i> Manage Donation Requests</h2>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5>Filter Requests</h5>
+    </div>
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <select class="form-select" name="status">
+                    <option value="">All Statuses</option>
+                    <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                    <option value="approved" {% if status_filter == 'approved' %}selected{% endif %}>Approved</option>
+                    <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>Rejected</option>
+                    <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" name="blood_group">
+                    <option value="">All Blood Groups</option>
+                    <option value="A+" {% if blood_group == 'A+' %}selected{% endif %}>A+</option>
+                    <option value="A-" {% if blood_group == 'A-' %}selected{% endif %}>A-</option>
+                    <option value="B+" {% if blood_group == 'B+' %}selected{% endif %}>B+</option>
+                    <option value="B-" {% if blood_group == 'B-' %}selected{% endif %}>B-</option>
+                    <option value="AB+" {% if blood_group == 'AB+' %}selected{% endif %}>AB+</option>
+                    <option value="AB-" {% if blood_group == 'AB-' %}selected{% endif %}>AB-</option>
+                    <option value="O+" {% if blood_group == 'O+' %}selected{% endif %}>O+</option>
+                    <option value="O-" {% if blood_group == 'O-' %}selected{% endif %}>O-</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search"></i> Filter
+                </button>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="{% url 'manage_requests' %}" class="btn btn-outline-secondary">Reset</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5>Donation Requests ({{ requests.count }})</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Donor</th>
+                        <th>Blood Group</th>
+                        <th>Blood Bank</th>
+                        <th>Units</th>
+                        <th>Request Date</th>
+                        <th>Status</th>
+                        <th>Admin Notes</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for request in requests %}
+                    <tr>
+                        <td>#{{ request.id }}</td>
+                        <td>{{ request.donor.user.get_full_name|default:request.donor.user.username }}</td>
+                        <td><span class="badge bg-danger">{{ request.blood_group }}</span></td>
+                        <td>{{ request.blood_bank.name }}</td>
+                        <td>{{ request.units_requested }}</td>
+                        <td>{{ request.request_date }}</td>
+                        <td>
+                            {% if request.status == 'pending' %}
+                                <span class="badge bg-warning">Pending</span>
+                            {% elif request.status == 'approved' %}
+                                <span class="badge bg-success">Approved</span>
+                            {% elif request.status == 'rejected' %}
+                                <span class="badge bg-danger">Rejected</span>
+                            {% else %}
+                                <span class="badge bg-info">Completed</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ request.admin_notes|default:"-" }}</td>
+                        <td>
+                            {% if request.status == 'pending' %}
+                            <div class="btn-group btn-group-sm">
+                                <form method="post" action="{% url 'approve_request' request.id %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-success btn-sm" 
+                                            onclick="return confirm('Approve this request?')">
+                                        <i class="bi bi-check"></i> Approve
+                                    </button>
+                                </form>
+                                <form method="post" action="{% url 'reject_request' request.id %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger btn-sm" 
+                                            onclick="return confirm('Reject this request?')">
+                                        <i class="bi bi-x"></i> Reject
+                                    </button>
+                                </form>
+                            </div>
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" class="text-center text-muted">No requests found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
